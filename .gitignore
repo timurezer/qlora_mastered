@@ -8,6 +8,10 @@ models_ds/*
 data/data_train_ms_*/
 data/base_distill/ds_teacher/shuf42/
 ops-transformer/
-MindSpeed-LLM/megatron/
+MindSpeed/
+MindSpeed-LLM/
 LoraAdapterTransformer/
 data
+docs/
+AGENTS.md
+scripts_qlora/perf_ctx_sweep
