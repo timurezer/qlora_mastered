@@ -41,13 +41,6 @@ pip install -r MindSpeed-LLM/requirements.txt
 # numpy 1.26; pin the pair proven on the reference containers.
 pip install pyarrow==25.0.1
 
-# Fused lightning indexer kernel (FUSED=1).
-if [ ! -d ops-transformer ]; then
-  git clone https://gitcode.com/cann/ops-transformer.git
-  git -C ops-transformer checkout 9.2.0
-fi
-bash installation/setup_fused_dsa_ops.sh
-
 # Other packages. torchao is required by the FP8 dequantization;
 # msmodelslim and openpyxl are only used by the optional utils/quantization tooling.
 pip install torchao
