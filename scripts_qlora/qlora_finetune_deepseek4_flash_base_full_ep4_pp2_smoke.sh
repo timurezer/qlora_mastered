@@ -53,6 +53,17 @@ CKPT_SAVE_DIR=${CKPT_SAVE_DIR:-$ROOT/models_ds/deepseek4_flash_base_full_ep4_pp2
 DATA_PATH=${DATA_PATH:-/data/lab-shared/timur/data/data_train_ms_alpaca/alpaca}
 TOKENIZER_PATH=${TOKENIZER_PATH:-$ROOT/models_ds/DeepSeek-V4-Flash-Base-bf16}
 
+# Dynamic-length batching: pad batches only to a multiple of 128 instead of the full
+# seq-length (run D's setup for the variable-length distill data). Off by default; the
+# default smoke data is pre-padded alpaca, where this is a no-op anyway. When enabled,
+# the save dir gets a _nopad suffix so it cannot clobber a padded run's adapter.
+NOPAD=${NOPAD:-0}
+PAD_ARGS=""
+if [ "$NOPAD" = "1" ]; then
+    PAD_ARGS="--no-pad-to-seq-lengths --pad-to-multiple-of 128"
+    CKPT_SAVE_DIR="${CKPT_SAVE_DIR}_nopad"
+fi
+
 if [ -e "$CKPT_SAVE_DIR" ]; then
     echo "ABORT: $CKPT_SAVE_DIR exists"; exit 1;
 fi
