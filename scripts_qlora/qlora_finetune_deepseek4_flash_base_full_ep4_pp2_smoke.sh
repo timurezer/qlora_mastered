@@ -83,8 +83,13 @@ DSA_ARGS="
     --index-head-dim 128 \
     --index-topk 512 \
     --enable-mhc \
+    --use-fused-mhc \
     --hc-mult 4 \
     --kv-compress \
+    --use-fused-lightning-indexer-loss \
+    --use-fused-lightning-indexer \
+    --use-sparse-flash-attn \
+    --indexer-loss-coeff 1.0 \
 "
 
 MLA_ARGS="
@@ -138,6 +143,10 @@ MEM_ARGS="
     --recompute-num-layers 1 \
     --swap-optimizer \
 "
+# TODO: test in the future
+# --recompute-csa-attention \
+# --mhc-recompute
+# --recompute-norm
 
 ROPE_ARGS="
     --beta-fast 32 \
@@ -252,4 +261,5 @@ python -m torch.distributed.launch $DISTRIBUTED_ARGS $REPO/posttrain_gpt.py \
     $DSA_ARGS \
     $CA_ARGS \
     $MEM_ARGS \
-    $FINETUNE_ARGS
+    $FINETUNE_ARGS \
+    $PAD_ARGS
