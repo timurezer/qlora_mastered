@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.torch_extensions/
+accuracy_eval/logs/
+scripts_qlora/logs/
+models_ds/*
+!models_ds/.gitkeep
+data/data_train_ms_*/
+data/base_distill/ds_teacher/shuf42/
+ops-transformer/
+MindSpeed-LLM/megatron/
+LoraAdapterTransformer/
+data
