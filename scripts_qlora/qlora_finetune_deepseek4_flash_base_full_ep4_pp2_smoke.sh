@@ -1,6 +1,6 @@
 #!/bin/bash
 # Full-model QLoRA smoke run on the master branch (dev/qlora_support), 8 cards, EP4 / PP2 / TP1.
-# Same argument set as the 3-layer smoke (qlora_finetune_deepseek4_flash_base_3layer_ep4_pp1_smoke.sh),
+# Same argument set as the 3-layer smoke (scripts_qlora/3layer/qlora_finetune_deepseek4_flash_base_3layer_ep4_pp1_smoke.sh),
 # full 43-layer geometry; --n-hash-layers 3 fits the 22-layer PP stages.
 # Run inside th_va30_qlora_train, detached:
 #   sudo -n docker exec -d th_va30_qlora_train bash -lc \
@@ -262,6 +262,23 @@ FINETUNE_ARGS="
     --lora-ckpt-filter
 "
 
+# QLoRA memory optimizations ported from qlora_clear
+# (docs/moe-optimizations-explained.md). Each requires the matching MindSpeed-LLM
+# feature branch; all default to off. EXPERT_CHUNK_SIZE needs EXPERT_DEQUANT_RECOMPUTE=1.
+BNB_DEQUANT_PATCH=${BNB_DEQUANT_PATCH:-0}          # needs dev/bnb_dequant_patch
+EXPERT_DEQUANT_RECOMPUTE=${EXPERT_DEQUANT_RECOMPUTE:-0}  # needs dev/expert_dequant_recompute
+EXPERT_CHUNK_SIZE=${EXPERT_CHUNK_SIZE:-0}          # needs dev/experts_chunking
+QLORA_OPT_ARGS=""
+if [ "$BNB_DEQUANT_PATCH" = 1 ]; then
+    QLORA_OPT_ARGS="$QLORA_OPT_ARGS --bnb-dequant-patch"
+fi
+if [ "$EXPERT_DEQUANT_RECOMPUTE" = 1 ]; then
+    QLORA_OPT_ARGS="$QLORA_OPT_ARGS --expert-dequant-recompute"
+fi
+if [ "$EXPERT_CHUNK_SIZE" -gt 0 ]; then
+    QLORA_OPT_ARGS="$QLORA_OPT_ARGS --expert-chunk-size $EXPERT_CHUNK_SIZE"
+fi
+
 python -m torch.distributed.launch $DISTRIBUTED_ARGS $REPO/posttrain_gpt.py \
     $GPT_ARGS \
     $DATA_ARGS \
@@ -273,4 +290,5 @@ python -m torch.distributed.launch $DISTRIBUTED_ARGS $REPO/posttrain_gpt.py \
     $CA_ARGS \
     $MEM_ARGS \
     $FINETUNE_ARGS \
+    $QLORA_OPT_ARGS \
     $PAD_ARGS
