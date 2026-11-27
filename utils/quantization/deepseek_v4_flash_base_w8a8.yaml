@@ -1,0 +1,59 @@
+# W8A8 recipe of /data/models/DeepSeek-V4-Flash-0731-w8a8 (its DeepSeek-V4-Flash-DSpark_best_practice.yaml),
+# applied to DeepSeek-V4-Flash-Base. Differs from msmodelslim's lab_practice/deepseek_v4/deepseek_v4_flash_w8a8.yaml:
+# no flex_smooth_quant, calibration on qwen3_cot_w4a4.json instead of mix_calib.jsonl.
+# The DSpark-only "mtp.*" block is dropped: its layers are already matched by '*attn*' / '*ffn*'.
+apiversion: modelslim_v1
+metadata:
+  config_id: deepseek_v4_flash_base_w8a8_0731_recipe
+  score: 90
+  verified_model_types:
+    - DeepSeek-V4-Flash
+  label:
+    w_bit: 8
+    a_bit: 8
+    is_sparse: False
+    kv_cache: False
+
+default_w8a8_dynamic: &default_w8a8_dynamic
+  act:
+    scope: "per_token"
+    dtype: "int8"
+    symmetric: True
+    method: "minmax"
+  weight:
+    scope: "per_channel"
+    dtype: "int8"
+    symmetric: True
+    method: "minmax"
+
+spec:
+  process:
+    - type: "quarot"
+      block_size: 32
+    - type: "linear_quant"
+      qconfig: *default_w8a8_dynamic
+      include:
+        - "*attn*"
+      exclude:
+        - "*wo_a"
+        - "*wo_b"
+        - "*compressor.wgate"
+        - "*compressor.wkv"
+        - "*indexer.weights_proj"
+        - "*indexer.compressor.wgate"
+        - "*indexer.compressor.wkv"
+    - type: "linear_quant"
+      qconfig: *default_w8a8_dynamic
+      include:
+        - "*ffn*"
+      exclude:
+        - "*gate"
+        - "*shared_experts*"
+    - type: "linear_quant"
+      qconfig: *default_w8a8_dynamic
+      include:
+        - "*ffn.shared_experts*"
+  dataset: qwen3_cot_w4a4.json
+  save:
+    - type: "ascendv1_saver"
+      part_file_size: 4
