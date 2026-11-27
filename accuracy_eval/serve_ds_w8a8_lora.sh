@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-LORA_PATH=${LORA_PATH:-$SCRIPT_DIR/../models_ds/deepseek4_flash_base_bf16_teacher_hf_quarot}
+LORA_PATH=${LORA_PATH:-$SCRIPT_DIR/../models_ds/deepseek4_flash_base_full_ep4_pp2_qlora_distill_1epoch_hf_quarot}
 
 exec bash "$SCRIPT_DIR/serve_ds_w8a8.sh" \
     --enable-lora \

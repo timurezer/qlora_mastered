@@ -33,7 +33,6 @@ if [ ! -d MindSpeed-LLM/megatron ]; then
   cp -r Megatron-LM/megatron MindSpeed-LLM/
   rm -rf Megatron-LM
 fi
-python MindSpeed-LLM/tools/megatron_patches/p2p_variable_shapes_mhc/apply_p2p_variable_shapes_mhc.py
 
 # MindSpeed-LLM Python requirements (includes bitsandbytes-npu-beta).
 pip install -r MindSpeed-LLM/requirements.txt

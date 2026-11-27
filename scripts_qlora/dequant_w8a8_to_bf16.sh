@@ -2,7 +2,7 @@
 # Dequantize the modelslim W8A8 Base checkpoint to a plain bf16 HF checkpoint.
 # The QuaRot rotation is deliberately KEPT: the result is a self-consistent bf16
 # model in the rotated (serving) basis, so an adapter trained on it must NOT go
-# through rotate_adapter.sh afterwards.
+# through scripts_qlora/rotate_adapter.sh afterwards.
 # CPU only, ~1-2 h, output ~554 GB. Run inside the training container:
 #   nohup bash scripts_qlora/dequant_w8a8_to_bf16.sh > logs_dequant_w8a8.txt 2>&1 &
 set -euo pipefail
