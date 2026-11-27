@@ -1,11 +1,14 @@
 """Count compressor / indexer / nf4 keys in a converted mcore checkpoint (zeroed compress_ratios -> 0 compressor keys).
-Usage: python check_ckpt_comp.py <ckpt_dir>
+Usage: python check_ckpt_comp.py <ckpt_dir> [--bf16]
+  --bf16: check an ordinary (non-QLoRA) bf16 conversion instead — compressor/indexer keys
+          must be present and there must be NO uint8 (nf4-packed) tensors.
 """
 import glob
 import sys
 
 import torch
 
+expect_bf16 = "--bf16" in sys.argv[1:]
 root = sys.argv[1]
 files = sorted(glob.glob(f"{root}/iter_*/mp_rank_*/model_optim_rng.pt"))
 total = {"keys": 0, "compressor": 0, "indexer": 0, "uint8": 0}
@@ -17,4 +20,9 @@ for path in files:
     for k in total:
         total[k] += c[k]
 print("TOTAL", total, "files", len(files))
-print("OK" if total["compressor"] > 0 and total["indexer"] > 0 and total["uint8"] > 0 else "BAD: missing compressor/indexer/nf4 keys")
+if expect_bf16:
+    ok = total["compressor"] > 0 and total["indexer"] > 0 and total["uint8"] == 0
+    print("OK" if ok else "BAD: bf16 checkpoint has uint8 (nf4) tensors or missing compressor/indexer keys")
+else:
+    ok = total["compressor"] > 0 and total["indexer"] > 0 and total["uint8"] > 0
+    print("OK" if ok else "BAD: missing compressor/indexer/nf4 keys")
